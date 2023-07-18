@@ -675,10 +675,9 @@ public class ModRegistry {
 
     //crank
     public static final Supplier<Block> CRANK = regWithItem(CRANK_NAME, () -> new CrankBlock(
-            BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.NONE)
-                    .strength(0.6f, 0.6f)
-                    .noCollission()
-                    .noOcclusion()
+            BlockBehaviour.Properties.of(Material.DECORATION)
+                    .instabreak()
+                    .sound(SoundType.WOOD)
     ), CreativeModeTab.TAB_REDSTONE);
 
     //wind vane

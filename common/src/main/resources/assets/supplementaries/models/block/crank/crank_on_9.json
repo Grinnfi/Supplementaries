@@ -1,0 +1,52 @@
+{
+	"ambientocclusion": false,
+	"credit": "Made with Blockbench, By Grinnfi",
+	"textures": {
+		"lever": "minecraft:block/lever",
+		"slab": "minecraft:block/smooth_stone",
+		"crank": "supplementaries:blocks/crank/crank_on_9",
+		"particle": "supplementaries:blocks/crank/crank_on_9"
+	},
+	"elements": [
+		{
+			"name": "Base",
+			"from": [0, 0, 0],
+			"to": [16, 2, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 4, 8]},
+			"faces": {
+				"north": {"uv": [0, 14, 16, 16], "texture": "#slab", "cullface": "north" },
+				"east": {"uv": [0, 14, 16, 16], "texture": "#slab", "cullface": "east" },
+				"south": {"uv": [0, 14, 16, 16], "texture": "#slab", "cullface": "south" },
+				"west": {"uv": [0, 14, 16, 16], "texture": "#slab", "cullface": "west" },
+				"up": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#crank"},
+				"down": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#slab", "cullface": "down" }
+			}
+		},
+		{
+			"name": "Handle_Grip",
+			"from": [7, 4, 7],
+			"to": [9, 6, 14],
+			"rotation": {"angle": -22.5, "axis": "y", "origin": [8, 4, 8]},
+			"faces": {
+				"north": {"uv": [7, 8, 9, 10], "rotation": 90, "texture": "lever"},
+				"east": {"uv": [7, 13, 9, 6], "rotation": 90, "texture": "lever"},
+				"south": {"uv": [7, 6, 9, 8], "rotation": 270, "texture": "lever"},
+				"west": {"uv": [7, 6, 9, 13], "rotation": 90, "texture": "lever"},
+				"up": {"uv": [7, 6, 9, 13], "rotation": 180, "texture": "lever"},
+				"down": {"uv": [9, 6, 7, 13], "texture": "lever"}
+			}
+		},
+		{
+			"name": "Handle_Base",
+			"from": [7, 2, 7],
+			"to": [9, 4, 9],
+			"rotation": {"angle": -22.5, "axis": "y", "origin": [8, 4, 8]},
+			"faces": {
+				"north": {"uv": [7, 13, 9, 15], "texture": "lever"},
+				"east": {"uv": [7, 13, 9, 15], "rotation": 180, "texture": "lever"},
+				"south": {"uv": [7, 13, 9, 15], "texture": "lever"},
+				"west": {"uv": [7, 13, 9, 15], "rotation": 180, "texture": "lever"}
+			}
+		}
+	]
+}
