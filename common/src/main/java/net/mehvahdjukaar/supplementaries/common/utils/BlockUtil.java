@@ -77,10 +77,6 @@ public class BlockUtil {
         return ret;
     }
 
-    public static Optional<Direction> tryRotatingBlock(Direction face, boolean ccw, BlockPos targetPos, Level level, Vec3 hit) {
-        return tryRotatingBlock(face, ccw, targetPos, level, level.getBlockState(targetPos), hit);
-    }
-
     // can be called on both sides
     // returns the direction onto which the block was actually rotated
     public static Optional<Direction> tryRotatingBlock(Direction dir, boolean ccw, BlockPos targetPos, Level world, BlockState state, Vec3 hit) {

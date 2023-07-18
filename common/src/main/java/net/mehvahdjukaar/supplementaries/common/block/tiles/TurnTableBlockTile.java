@@ -30,7 +30,7 @@ public class TurnTableBlockTile extends BlockEntity {
         this.canRotate = true;
         //updates correct cooldown
         this.cooldown = TurnTableBlock.getPeriod(this.getBlockState());
-        // allows for a rotation try nedxt period
+        // allows for a rotation try next period
     }
 
     public int getCatTimer() {
@@ -49,7 +49,7 @@ public class TurnTableBlockTile extends BlockEntity {
             Direction dir = state.getValue(TurnTableBlock.FACING);
             boolean ccw = state.getValue(TurnTableBlock.INVERTED) ^ (state.getValue(TurnTableBlock.FACING) == Direction.DOWN);
             BlockPos targetPos = pos.relative(dir);
-            boolean success = BlockUtil.tryRotatingBlock(dir, ccw, targetPos, level, null).isPresent();
+            boolean success = BlockUtil.tryRotatingBlock(dir, ccw, targetPos, level, level.getBlockState(targetPos), null).isPresent();
             if (success) {
                 //play particle with block event
                 level.blockEvent(pos, state.getBlock(), 0, 0);
