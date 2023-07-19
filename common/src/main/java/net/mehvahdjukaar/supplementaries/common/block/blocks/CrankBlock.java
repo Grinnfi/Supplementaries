@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.supplementaries.common.block.blocks;
 
+import net.mehvahdjukaar.moonlight.api.block.IRotatable;
 import net.mehvahdjukaar.supplementaries.reg.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,19 +15,25 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
-public class CrankBlock extends HorizontalDirectionalBlock {
+import java.util.Optional;
+
+public class CrankBlock extends HorizontalDirectionalBlock implements IRotatable {
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
     public static final IntegerProperty POWER = BlockStateProperties.POWER;
 
@@ -67,23 +74,28 @@ public class CrankBlock extends HorizontalDirectionalBlock {
         if (!player.getAbilities().mayBuild) {
             return InteractionResult.PASS;
         } else {
-            //cycle power
-            state = state.setValue(POWER, (16+state.getValue(POWER)+(player.isShiftKeyDown()?-1:1))%16);
-            level.setBlock(pos, state, 3);/// ???
-            this.updateNeighborsInFront(level, pos, state);
-            //add smoke particle and sound when going back to 0
-            if (state.getValue(POWER) == 0) {
-                makeParticle (state, pos, level, ParticleTypes.SMOKE);
-                level.playSound(null, pos,
-                        ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.5F, 0.5f);
-            }
-            else {
-                level.playSound(null, pos,
-                        ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.5F, 0.5f + state.getValue(POWER) * 0.05f);
-            }
+            boolean ccw = player.isShiftKeyDown();
+            this.activate(state, level, pos, ccw);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
     }
+
+    protected void activate(BlockState state, Level level, BlockPos pos, boolean ccw) {
+        state = state.setValue(POWER, (16 + state.getValue(POWER) + (ccw ? -1 : 1)) % 16);
+        level.setBlock(pos, state, 3);
+        this.updateNeighborsInFront(level, pos, state);
+        //add smoke particle and sound when going back to 0
+        if (state.getValue(POWER) == 0) {
+            makeParticle (state, pos, level, ParticleTypes.SMOKE);
+            level.playSound(null, pos,
+                    ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.5F, 0.5f);
+        }
+        else {
+            level.playSound(null, pos,
+                    ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.5F, 0.5f + state.getValue(POWER) * 0.05f);
+        }
+    }
+
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return (BlockState)this.defaultBlockState().setValue(FACING, context.getHorizontalDirection());
     }
@@ -103,7 +115,6 @@ public class CrankBlock extends HorizontalDirectionalBlock {
     public int getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         return state.getValue(FACING) == direction.getOpposite() ? state.getValue(POWER) : 0;
     }
-
 
     protected void updateNeighborsInFront(Level level, BlockPos pos, BlockState state) {
         Direction direction = (Direction)state.getValue(FACING).getOpposite();
@@ -134,4 +145,32 @@ public class CrankBlock extends HorizontalDirectionalBlock {
             makeParticle (state, pos, level, DustParticleOptions.REDSTONE);
         }
     }
+
+    @Override
+    public Optional<BlockState> getRotatedState(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Rotation rotation, Direction direction, @Nullable Vec3 vec3) {
+        //System.out.println("getRotatedState: " + "BlockState: " + blockState + "LevelAccessor: " + levelAccessor + "BlockPos: " + blockPos + "Rotation: " + rotation + "Direction: " + direction);
+        //getRotatedState: BlockState: Block{supplementaries:crank}[facing=north,power=8]LevelAccessor: ServerLevel[test]BlockPos: BlockPos{x=-45, y=-59, z=15}Rotation: CLOCKWISE_90Direction: up
+        //getRotatedState: BlockState: Block{supplementaries:crank}[facing=north,power=8]LevelAccessor: ServerLevel[test]BlockPos: BlockPos{x=-45, y=-59, z=15}Rotation: COUNTERCLOCKWISE_90Direction: up
+        boolean cww = rotation == Rotation.CLOCKWISE_90;
+        activate(blockState, (Level) levelAccessor, blockPos, cww);
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Direction> rotateOverAxis(BlockState state, LevelAccessor world, BlockPos pos, Rotation rotation, Direction axis, @Nullable Vec3 hit) {
+        /*
+        System.out.println("rotateOverAxis: " + "BlockState: " + state + "LevelAccessor: " + world + "BlockPos: " + pos + "Rotation: " + rotation + "Direction: " + axis);
+        boolean cww = rotation == Rotation.CLOCKWISE_90;
+        activate(state, (Level) world, pos, cww);
+         */
+        return IRotatable.super.rotateOverAxis(state, world, pos, rotation, axis, hit);
+    }
+
+
+    @Override
+    public void onRotated(BlockState newState, BlockState oldState, LevelAccessor world, BlockPos pos, Rotation rotation, Direction axis, @Nullable Vec3 hit) {
+        //System.out.println("onRotated: " + "newState: " + newState + "oldState: " + oldState + "LevelAccessor: " + world + "BlockPos: " + pos + "Rotation: " + rotation + "Direction: " + axis);
+        IRotatable.super.onRotated(newState, oldState, world, pos, rotation, axis, hit);
+    }
+
 }
