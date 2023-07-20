@@ -43,7 +43,7 @@ public class CrankBlock extends HorizontalDirectionalBlock implements IRotatable
                 .setValue(FACING, Direction.NORTH)
                 .setValue(POWER, 0));
     }
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, POWER);
     }
 
@@ -51,8 +51,8 @@ public class CrankBlock extends HorizontalDirectionalBlock implements IRotatable
         return SHAPE;
     }
 
-    //make redstone connect, should happen only on the direction it outputs
-     public boolean isSignalSource(BlockState state) {
+    //make redstone connect
+    public boolean isSignalSource(BlockState state) {
         return true;
     }
 
@@ -86,14 +86,10 @@ public class CrankBlock extends HorizontalDirectionalBlock implements IRotatable
         this.updateNeighborsInFront(level, pos, state);
         //add smoke particle and sound when going back to 0
         if (state.getValue(POWER) == 0) {
-            makeParticle (state, pos, level, ParticleTypes.SMOKE);
-            level.playSound(null, pos,
-                    ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.5F, 0.5f);
+            makeParticle(state, pos, level, ParticleTypes.SMOKE);
         }
-        else {
-            level.playSound(null, pos,
-                    ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.5F, 0.5f + state.getValue(POWER) * 0.05f);
-        }
+        level.playSound(null, pos,
+                ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.5F, 0.5f + state.getValue(POWER) * 0.05f);
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext context) {
@@ -113,7 +109,7 @@ public class CrankBlock extends HorizontalDirectionalBlock implements IRotatable
 
     //strong power
     public int getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        return state.getValue(FACING) == direction.getOpposite() ? state.getValue(POWER) : 0;
+        return state.getSignal(level, pos, direction);
     }
 
     protected void updateNeighborsInFront(Level level, BlockPos pos, BlockState state) {
@@ -148,29 +144,18 @@ public class CrankBlock extends HorizontalDirectionalBlock implements IRotatable
 
     @Override
     public Optional<BlockState> getRotatedState(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Rotation rotation, Direction direction, @Nullable Vec3 vec3) {
-        //System.out.println("getRotatedState: " + "BlockState: " + blockState + "LevelAccessor: " + levelAccessor + "BlockPos: " + blockPos + "Rotation: " + rotation + "Direction: " + direction);
-        //getRotatedState: BlockState: Block{supplementaries:crank}[facing=north,power=8]LevelAccessor: ServerLevel[test]BlockPos: BlockPos{x=-45, y=-59, z=15}Rotation: CLOCKWISE_90Direction: up
-        //getRotatedState: BlockState: Block{supplementaries:crank}[facing=north,power=8]LevelAccessor: ServerLevel[test]BlockPos: BlockPos{x=-45, y=-59, z=15}Rotation: COUNTERCLOCKWISE_90Direction: up
-        boolean cww = rotation == Rotation.CLOCKWISE_90;
-        activate(blockState, (Level) levelAccessor, blockPos, cww);
-        return Optional.empty();
+       return Optional.of(blockState);
     }
 
     @Override
     public Optional<Direction> rotateOverAxis(BlockState state, LevelAccessor world, BlockPos pos, Rotation rotation, Direction axis, @Nullable Vec3 hit) {
-        /*
-        System.out.println("rotateOverAxis: " + "BlockState: " + state + "LevelAccessor: " + world + "BlockPos: " + pos + "Rotation: " + rotation + "Direction: " + axis);
-        boolean cww = rotation == Rotation.CLOCKWISE_90;
-        activate(state, (Level) world, pos, cww);
-         */
         return IRotatable.super.rotateOverAxis(state, world, pos, rotation, axis, hit);
     }
 
-
     @Override
     public void onRotated(BlockState newState, BlockState oldState, LevelAccessor world, BlockPos pos, Rotation rotation, Direction axis, @Nullable Vec3 hit) {
-        //System.out.println("onRotated: " + "newState: " + newState + "oldState: " + oldState + "LevelAccessor: " + world + "BlockPos: " + pos + "Rotation: " + rotation + "Direction: " + axis);
-        IRotatable.super.onRotated(newState, oldState, world, pos, rotation, axis, hit);
+        boolean ccw = rotation == Rotation.COUNTERCLOCKWISE_90;
+        activate(newState, (Level) world, pos, ccw);
+        //IRotatable.super.onRotated(newState, oldState, world, pos, rotation, axis, hit);
     }
-
 }
